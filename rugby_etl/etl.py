@@ -4,7 +4,6 @@ from transform import transform
 from load import load
 from helpers import get_date_range, LocalFileSystemHandler, load_config
 from model import get_db
-from helpers import ETLConfig
 import datetime
 
 from abc import abstractmethod
@@ -27,7 +26,7 @@ def cmd():
     import argparse
 
     parser = argparse.ArgumentParser(description="Rugby ETL")
-    parser.add_argument("--stages", '-s', help="Comma separated ETL stages to run (ingest,extract,transform,ingest)")
+    parser.add_argument("--stages", '-s', help="Comma separated ETL stages to run (e.g. ingest,extract,transform,ingest)")
     parser.add_argument("--filehandler", '-f', help="Which file handler to use (local, aws)", default='local')
 
     args = parser.parse_args()

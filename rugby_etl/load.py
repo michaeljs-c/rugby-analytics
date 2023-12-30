@@ -3,9 +3,11 @@ import os
 import polars as pl
 from model import GameStats, PlayerStats, Matches
 
+
 def insert_data_into_table(data: pl.DataFrame, session, table_class):
-    for _, row in data.iterrows():
-        record = table_class(**row.to_dict())
+    for row in data.iter_rows():
+        row_dict = dict(zip([c.replace('/', '_') for c in data.columns], row))
+        record = table_class(**row_dict)
         session.add(record)
     session.commit()
 

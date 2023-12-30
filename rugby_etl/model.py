@@ -1,18 +1,15 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, Boolean
-from sqlalchemy.ext.declarative import declarative_base
-from helpers import load_config
-from datetime import datetime
+from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, Boolean, PrimaryKeyConstraint
+from sqlalchemy.ext.declarative import declarative_base, DeclarativeMeta
 
-# engine = create_engine(load_config().database_url)
 Base = declarative_base()
 
 class GameStats(Base):
     __tablename__ = 'game_stats'
 
     teamid = Column(Integer, primary_key=True)
-    gameid = Column(Integer)
+    gameid = Column(Integer, primary_key=True)
     team = Column(String)
     runs = Column(Integer)
     meters_run = Column(Integer)
@@ -25,7 +22,7 @@ class GameStats(Base):
     tries = Column(Integer)
     conversion_goals = Column(Integer)
     penalty_goals = Column(Integer)
-    kick_percent_success = Column(Float)
+    kick_percent_success = Column(String)
     kicks_from_hand = Column(Integer)
     passes = Column(Integer)
     possession_1h_2h = Column(String)
@@ -44,11 +41,15 @@ class GameStats(Base):
     yellow_cards = Column(Integer)
     total_free_kicks_conceded = Column(Integer)
 
+    __table_args__ = (
+        PrimaryKeyConstraint('teamid', 'gameid'),
+    )
+
 class Matches(Base):
     __tablename__ = 'matches'
 
-    date = Column(DateTime, default=datetime.utcnow, primary_key=True)
-    gameid = Column(Integer, unique=True)
+    gameid = Column(Integer, primary_key=True)
+    date = Column(DateTime)
     home_id = Column(Integer)
     away_id = Column(Integer)
     home_team = Column(String)
@@ -64,6 +65,8 @@ class PlayerStats(Base):
     __tablename__ = 'player_stats'
 
     id = Column(Integer, primary_key=True)
+    gameid = Column(Integer, primary_key=True)
+    teamid = Column(Integer)
     name = Column(String)
     number = Column(Integer)
     position = Column(String)
@@ -94,8 +97,10 @@ class PlayerStats(Base):
     penalty_goals = Column(Integer)
     conversion_goals = Column(Integer)
     drop_goals_converted = Column(Integer)
-    gameid = Column(Integer)
-    teamid = Column(Integer)
+
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'gameid'),
+    )
 
 def create_database_engine(database_url):
     engine = create_engine(database_url)
@@ -108,14 +113,10 @@ def create_session(engine):
     Session = sessionmaker(bind=engine)
     return Session()
 
-# # Create the table
-# Base.metadata.create_all(bind=engine)
-
 def get_db(database_url):
     # Create a SQLAlchemy engine with the parameterized database URL
     engine = create_database_engine(database_url)
     # Create tables if they don't exist
     create_tables(engine)
-    # Create a session
     session = create_session(engine)
     return session

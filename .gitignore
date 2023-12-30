@@ -4,3 +4,4 @@ data
 test_output
 *.log
 *.db
+.mypy_cache
